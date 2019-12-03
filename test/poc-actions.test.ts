@@ -5,7 +5,7 @@ import PocActions = require('../lib/poc-actions-stack');
 test('Empty Stack', () => {
     const app = new cdk.App();
     // WHEN
-    const stack = new PocActions.PocActionsStack(app, 'MyTestStack');
+    const stack = new PocActions.CdkIamStack(app, 'MyTestStack');
     // THEN
     expectCDK(stack).to(matchTemplate({
       "Resources": {}
