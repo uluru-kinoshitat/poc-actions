@@ -1,0 +1,91 @@
+name: deploy resource
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+
+
+jobs:
+  aws_cdk:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Setup TypeScript
+        run: npm install typescript -g
+
+      - name: Setup dependencies
+        run: |
+          npm ci
+          npm run build
+
+      # - name: cdk diff
+      #   uses: youyo/aws-cdk-github-actions@master
+      #   with:
+      #     cdk_subcommand: 'diff'
+      #     actions_comment: 'true'
+      #   env:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     AWS_DEFAULT_REGION: 'us-east-1'
+
+      # - name: deployment pending
+      #   uses: deliverybot/deployment-status@v1
+      #   with:
+      #     state: 'pending'
+      #     token: '${{ github.token }}'
+
+      - name: cdk deploy
+        uses: youyo/aws-cdk-github-actions@master
+        run: |
+          STACK=$(echo ${{ github.head_ref }} | sed -e "s#refs/heads/##g")
+        with:
+          cdk_subcommand: 'deploy'
+          cdk_stack: $STACK
+          cdk_version: '1.17.1'
+          actions_comment: false
+          args: '--require-approval never'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: 'us-east-1'
+  
+      - name: error notification to Slack
+        if: failure()
+        uses: bryan-nice/slack-notification@master
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: times_kinoshita
+          SLACK_ICON: github
+          SLACK_USERNAME: Github Actions
+          SLACK_TITLE: DEPLOYMENT ERROR
+          SLACK_MESSAGE: ${{ github.head_ref }} deployment has been fail!
+
+      - name: cdk synth
+        uses: youyo/aws-cdk-github-actions@master
+        with:
+          cdk_subcommand: 'synth'
+          cdk_version: '1.17.1'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: 'us-east-1'
+
+      - name: error notification to Slack
+        if: success()
+        uses: bryan-nice/slack-notification@master
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: times_kinoshita
+          SLACK_ICON: github
+          SLACK_USERNAME: Github Actions
+          SLACK_TITLE: DEPLOYMENT SUCCESS
+          SLACK_MESSAGE: ${{ github.head_ref }} deployment has been success!
