@@ -70,10 +70,3 @@ test('IAM Resource Stack', () => {
   const stack = new CdkIamStack(app, 'IAMTestStack');
   expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot();
 });
-
-
-// test('IAM roles fine', () => {
-//     const app = new App();
-//     const stack = new CdkIamStack(app, 'rolesFineGrainedTestStack');
-//     expect(SynthUtils.toCloudFormation(stack)).toMatchSnapshot()
-// })

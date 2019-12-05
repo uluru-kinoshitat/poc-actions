@@ -26,6 +26,8 @@
     "source-map-support": "^0.5.16"
   },
   "jest": {
-    "moduleFileExtensions": ["js"]
+    "moduleFileExtensions": [
+      "js"
+    ]
   }
 }

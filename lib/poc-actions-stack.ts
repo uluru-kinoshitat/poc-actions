@@ -1,6 +1,6 @@
 import { Construct, Stack, StackProps }  from '@aws-cdk/core';
 import { Group, Policy, PolicyStatement, ManagedPolicy, User } from '@aws-cdk/aws-iam';
-// import * as AWS from 'aws-sdk';
+import AWS = require('aws-sdk');
 // import IAM from 'aws-sdk/clients/iam';
 // import { UpdateAccountPasswordPolicyRequest } from '@aws-sdk/client-iam-node';
 
@@ -21,17 +21,15 @@ export class CdkIamStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    // // import aws-sdk for JavaScript `npm install aws-sdk`
-    // const accountPasswordPolicy = new AWS.IAM({});
-    // accountPasswordPolicy.UpdateAccountPasswordPolicyRequest({
-    //   "MinimumPasswordLength": 8,
-    //   "RequireSymbols": false,
-    //   "RequireNumbers": true,
-    //   "RequireUppercaseCharacters": true,
-    //   "RequireLowercaseCharacters": true,
-    //   "AllowUsersToChangePassword": true,
-    //   "ExpirePasswords": false
-    // });
+    const accountPasswordPolicy = new AWS.IAM({});
+    accountPasswordPolicy.updateAccountPasswordPolicy({
+      "MinimumPasswordLength": 9,
+      "RequireSymbols": false,
+      "RequireNumbers": true,
+      "RequireUppercaseCharacters": true,
+      "RequireLowercaseCharacters": true,
+      "AllowUsersToChangePassword": true,
+    }, function(){});
     
     //アカウントのパスワードポリシーを見に行く権限
     const getAccountPassword = new PolicyStatement({
