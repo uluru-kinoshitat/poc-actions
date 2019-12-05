@@ -32,10 +32,10 @@ jobs:
       # https://dev.classmethod.jp/cloud/aws/aws-cdk-testing/
       - name: Unit tests
         run: |
-          npm install @aws-cdk/assert/jest
+          # npm install @aws-cdk/assert/jest
           npm run build
           npm run test
-          npm run test -- -u
+          # npm run test -- -u
 
       - name: cdk diff
         uses: youyo/aws-cdk-github-actions@master
