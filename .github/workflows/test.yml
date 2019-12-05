@@ -41,6 +41,7 @@ jobs:
         uses: youyo/aws-cdk-github-actions@master
         with:
           cdk_subcommand: 'diff'
+          cdk_stack: 'poc-actions'
           actions_comment: false
           cdk_version: '1.17.1'
         env:

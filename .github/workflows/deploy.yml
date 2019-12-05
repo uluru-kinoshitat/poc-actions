@@ -45,11 +45,9 @@ jobs:
 
       - name: cdk deploy
         uses: youyo/aws-cdk-github-actions@master
-        run: |
-          STACK=$(echo ${{ github.head_ref }} | sed -e "s#refs/heads/##g")
         with:
           cdk_subcommand: 'deploy'
-          cdk_stack: $STACK
+          cdk_stack: 'poc-actions'
           cdk_version: '1.17.1'
           actions_comment: false
           args: '--require-approval never'
