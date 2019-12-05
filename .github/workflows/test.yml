@@ -41,7 +41,7 @@ jobs:
         uses: youyo/aws-cdk-github-actions@master
         with:
           cdk_subcommand: 'diff'
-          cdk_stack: 'poc-actions'
+          cdk_stack: 'CdkIamStack'
           actions_comment: false
           cdk_version: '1.17.1'
         env:
@@ -61,7 +61,7 @@ jobs:
           SLACK_TITLE: PR Test ${{ github.head_ref }}
           SLACK_MESSAGE: 'PR test has been returning error!'
 
-      - name: succeed notification to Slack
+      - name: passed notification to Slack
         if: success()
         uses: bryan-nice/slack-notification@master
         env:
