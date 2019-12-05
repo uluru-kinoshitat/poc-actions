@@ -12,6 +12,7 @@ override.tf.json
 !jest.config.js
 *.d.ts
 node_modules
+__snapshots__
 
 # CDK asset staging directory
 .cdk.staging
