@@ -23,8 +23,8 @@ jobs:
       - name: Run AWS Logs
         id: count
         env:
-          LOG_GROUP_NAME: ${{ secret.LOG_GROUP_NAME }}
-          FILTER_PATTERN: ${{ secret.FILTER_PATTERN }}
+          LOG_GROUP_NAME: ${{ secrets.LOG_GROUP_NAME }}
+          FILTER_PATTERN: ${{ secrets.FILTER_PATTERN }}
         run: aws logs filter-log-events --log-group-name ${{ proccess.env.LOG_GROUP_NAME }} --filter-pattern ${{ proccess.env.FILTER_PATTERN }} --start-time $(date -d '1 day ago' +%s)000 --end-time $(date +%s)000 --query '*[].message' --output text | tr "\t" "\n" | wc -l
 
       - name: Notify Result
