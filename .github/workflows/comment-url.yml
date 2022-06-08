@@ -25,7 +25,7 @@ jobs:
         env:
           LOG_GROUP_NAME: ${{ secrets.LOG_GROUP_NAME }}
           FILTER_PATTERN: ${{ secrets.FILTER_PATTERN }}
-        run: aws logs filter-log-events --log-group-name ${{ proccess.env.LOG_GROUP_NAME }} --filter-pattern ${{ proccess.env.FILTER_PATTERN }} --start-time $(date -d '1 day ago' +%s)000 --end-time $(date +%s)000 --query '*[].message' --output text | tr "\t" "\n" | wc -l
+        run: aws logs filter-log-events --log-group-name ${{ process.env.LOG_GROUP_NAME }} --filter-pattern ${{ process.env.FILTER_PATTERN }} --start-time $(date -d '1 day ago' +%s)000 --end-time $(date +%s)000 --query '*[].message' --output text | tr "\t" "\n" | wc -l
 
       - name: Notify Result
         if: steps.count.outcome == 'success'
@@ -42,7 +42,7 @@ jobs:
             			"type": "section",
             			"text": {
             				"type": "mrkdwn",
-            				"text": " 昨日のカウントは `${{ proccess.env.COUNT_RESULT }}` だったよ"
+            				"text": " 昨日のカウントは `${{ process.env.COUNT_RESULT }}` だったよ"
             			}
             		}
             	]
