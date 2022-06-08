@@ -24,6 +24,8 @@ jobs:
           aws-region: ap-northeast-1
 
       - name: Count Logs
+        env:
+          TZ: "Asia/Tokyo"
         id: count
         run: aws logs filter-log-events --log-group-name ${{ env.LOG_GROUP_NAME }} --filter-pattern ${{ env.FILTER_PATTERN }} --start-time $(date -d '1 day ago' +%s)000 --end-time $(date +%s)000 --query '*[].message' --output text | tr "\t" "\n" | wc -l > ./result
 
