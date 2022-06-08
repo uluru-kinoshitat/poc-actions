@@ -33,6 +33,7 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          MESSAGE: "昨日のカウントは `${{ steps.count.outputs.stdout }}` だったよ"
         with:
           payload: |
             {
@@ -41,7 +42,7 @@ jobs:
             			"type": "section",
             			"text": {
             				"type": "mrkdwn",
-            				"text": " 昨日のカウントは `${{ steps.count.outputs.stdout }}` だったよ"
+            				"text": "${process.env.MESSAGE}`"
             			}
             		}
             	]
