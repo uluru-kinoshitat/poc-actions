@@ -23,9 +23,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.PROD_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-1
 
-      - name: Run AWS Logs
+      - name: Count Logs
         id: count
-        run: aws logs filter-log-events --log-group-name ${{ env.LOG_GROUP_NAME }} --filter-pattern ${{ env.FILTER_PATTERN }} --start-time $(date -d '1 day ago' +%s)000 --end-time $(date +%s)000 --query '*[].message' --output text | tr "\t" "\n" | wc -l
+        run: aws logs filter-log-events --log-group-name ${{ env.LOG_GROUP_NAME }} --filter-pattern ${{ env.FILTER_PATTERN }} --start-time $(date -d '1 day ago' +%s)000 --end-time $(date +%s)000 --query '*[].message' --output text | tr "\t" "\n" | wc -l > ./result
+
+      - name: Echo Result
+        id: result
+        run: echo "::set-output name=result::$(cat ./result)"
 
       - name: Notify Result
         if: steps.count.outcome == 'success'
@@ -33,7 +37,6 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-          MESSAGE: "昨日のカウントは `${{ steps.count.outputs.stdout }}` だったよ"
         with:
           payload: |
             {
@@ -42,7 +45,7 @@ jobs:
             			"type": "section",
             			"text": {
             				"type": "mrkdwn",
-            				"text": "${process.env.MESSAGE}`"
+            				"text": "昨日のカウントは `${{ steps.result.outputs.result }}` だったよ"
             			}
             		}
             	]
