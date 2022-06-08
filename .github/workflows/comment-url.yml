@@ -1,21 +1,49 @@
-name: Comment URL
+name: Post Slack
 
 on:
   pull_request:
-    types: [opened]
-env:
-  BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+    types:
+      - opened
+      - synchronize
+    branches:
+      - master
+      - develop
 
 jobs:
   comment:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v4
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `でも: http://${{ env.BUCKET_NAME }}.s3-website-ap-northeast-1.amazonaws.com`
-            })
+          aws-access-key-id: ${{ secrets.PROD_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.PROD_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
+
+      - name: Run AWS Logs
+        id: count
+        env:
+          LOG_GROUP_NAME: ${{ secret.LOG_GROUP_NAME }}
+          FILTER_PATTERN: ${{ secret.FILTER_PATTERN }}
+        run: aws logs filter-log-events --log-group-name ${{ proccess.env.LOG_GROUP_NAME }} --filter-pattern ${{ proccess.env.FILTER_PATTERN }} --start-time $(date -d '1 day ago' +%s)000 --end-time $(date +%s)000 --query '*[].message' --output text | tr "\t" "\n" | wc -l
+
+      - name: Notify Result
+        if: steps.count.outcome == 'success'
+        uses: slackapi/slack-github-action@v1.18
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          COUNT_RESULT: "${{ steps.count.outputs.stdout }}"
+        with:
+          payload: |
+            {
+            	"blocks": [
+            		{
+            			"type": "section",
+            			"text": {
+            				"type": "mrkdwn",
+            				"text": " 昨日のカウントは `${{ proccess.env.COUNT_RESULT }}` だったよ"
+            			}
+            		}
+            	]
+            }
