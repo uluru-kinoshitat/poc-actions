@@ -1,4 +1,4 @@
-name: Post Slack
+name: AWS Command
 
 on:
   pull_request:
@@ -8,46 +8,10 @@ on:
     branches:
       - master
       - develop
-env:
-  LOG_GROUP_NAME: ${{ secrets.LOG_GROUP_NAME }}
-  FILTER_PATTERN: ${{ secrets.FILTER_PATTERN }}
-  TZ: "Asia/Tokyo"
 
 jobs:
-  comment:
+  aws:
     runs-on: ubuntu-latest
     steps:
-      - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.PROD_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.PROD_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-1
-
-      - name: Count Logs
-        id: count
-        run: aws logs filter-log-events --log-group-name ${{ env.LOG_GROUP_NAME }} --filter-pattern ${{ env.FILTER_PATTERN }} --start-time $(date -d '1 day ago' +%s)000 --end-time $(date +%s)000 --query '*[].message' --output text | tr "\t" "\n" | wc -l > ./result
-
-      - name: Echo Result
-        id: result
-        run: echo "::set-output name=result::$(cat ./result)"
-
-      - name: Notify Result
-        if: steps.count.outcome == 'success'
-        uses: slackapi/slack-github-action@v1.18
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-        with:
-          payload: |
-            {
-            	"blocks": [
-            		{
-            			"type": "section",
-            			"text": {
-            				"type": "mrkdwn",
-            				"text": "昨日のカウントは `${{ steps.result.outputs.result }}` だったよ"
-            			}
-            		}
-            	]
-            }
+      - name: aws version
+        run: aws --version
