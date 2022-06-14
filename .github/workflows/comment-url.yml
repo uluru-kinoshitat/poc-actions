@@ -7,7 +7,7 @@ on:
       - synchronize
 
 jobs:
-  virus scan:
+  Scan:
     runs-on: ubuntu-latest
 
     steps:
