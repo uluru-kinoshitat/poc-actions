@@ -1,29 +1,19 @@
 name: ClamAV scan
 
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
+  push:
+    branches:
+      - develop
 
 jobs:
-  Scan:
+  ClamAV_Scan:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
-      - name: Git AV Scan
+
+      - name: GitHub ClamAV Scan
         id: scan
         uses: djdefi/gitavscan@main
         with:
           full: '--full'
-
-      - uses: actions/github-script@v4
-        with:
-          script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `Scan ${{ steps.scan.outcome }}`
-            })
