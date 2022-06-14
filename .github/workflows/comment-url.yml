@@ -1,4 +1,4 @@
-name: Comment URL
+name: ClamAV scan
 
 on:
   pull_request:
@@ -9,16 +9,15 @@ on:
 jobs:
   virus scan:
     runs-on: ubuntu-latest
-    name: clamAV scan
-    id: scan
-    steps:
-    - uses: actions/checkout@v2
-    - name: GitHub AV Scan
-      uses: djdefi/gitavscan@main
 
-  comment:
-    runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+      - name: Git AV Scan
+        id: scan
+        uses: djdefi/gitavscan@main
+        with:
+          full: '--full'
+
       - uses: actions/github-script@v4
         with:
           script: |
