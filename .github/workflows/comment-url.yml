@@ -2,11 +2,20 @@ name: Comment URL
 
 on:
   pull_request:
-    types: [opened]
-env:
-  BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+    types:
+      - opened
+      - synchronize
 
 jobs:
+  virus scan:
+    runs-on: ubuntu-latest
+    name: clamAV scan
+    id: scan
+    steps:
+    - uses: actions/checkout@v2
+    - name: GitHub AV Scan
+      uses: djdefi/gitavscan@main
+
   comment:
     runs-on: ubuntu-latest
     steps:
@@ -17,5 +26,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `でも: http://${{ env.BUCKET_NAME }}.s3-website-ap-northeast-1.amazonaws.com`
+              body: `Scan ${{ steps.scan.outcome }}`
             })
