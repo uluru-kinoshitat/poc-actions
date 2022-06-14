@@ -1,7 +1,10 @@
 name: ClamAV scan
 
 on:
-  push:
+  pull_request:
+    types:
+      - opened
+      - synchronize
     branches:
       - develop
 
@@ -17,3 +20,15 @@ jobs:
         uses: djdefi/gitavscan@main
         with:
           full: '--full'
+
+      - name: Comment result
+        if: steps.scan.outcome == 'failure'
+        uses: actions/github-script@v4
+        with:
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Scan ${{ steps.scan.outcome }}`
+            })
