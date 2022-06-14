@@ -18,8 +18,6 @@ jobs:
       - name: GitHub ClamAV Scan
         id: scan
         uses: djdefi/gitavscan@main
-        with:
-          full: '--full'
 
       - name: Comment result
         if: steps.scan.outcome == 'failure'
