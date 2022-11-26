@@ -1,0 +1,74 @@
+name: check cdk diff
+
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+
+jobs:
+  aws_cdk_diff:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Setup TypeScript
+        run: npm install tslint typescript -g
+
+      - name: Lint check with tslint
+        run: tslint './lib/*.ts'
+
+      - name: Setup dependencies
+        run: |
+          npm ci
+          npm run build
+      
+      # https://dev.classmethod.jp/cloud/aws/aws-cdk-testing/
+      - name: Unit tests
+        run: |
+          # npm install @aws-cdk/assert/jest
+          npm run build
+          npm run test
+          # npm run test -- -u
+
+      - name: cdk diff
+        uses: youyo/aws-cdk-github-actions@master
+        with:
+          cdk_subcommand: 'diff'
+          cdk_stack: 'CdkIamStack'
+          actions_comment: false
+          cdk_version: '1.17.1'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: 'us-east-1'
+
+      - name: error notification to Slack
+        if: failure()
+        uses: bryan-nice/slack-notification@master
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: times_kinoshita
+          SLACK_COLOR: '#cb2431'
+          SLACK_ICON: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png?size=48'
+          SLACK_USERNAME: Github Actions
+          SLACK_TITLE: PR Test ${{ github.head_ref }}
+          SLACK_MESSAGE: 'PR test has been returning error!'
+
+      - name: passed notification to Slack
+        if: success()
+        uses: bryan-nice/slack-notification@master
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: times_kinoshita
+          SLACK_COLOR: '#3dc105'
+          SLACK_ICON: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png?size=48'
+          SLACK_USERNAME: Github Actions
+          SLACK_TITLE: PR Test ${{ github.head_ref }}
+          SLACK_MESSAGE: Test result has been returning SUCCESS!
